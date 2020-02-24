@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --partition=short
+#SBATCH --chdir=/wrk/users/jumaatta
+#SBATCH --job-name=rbfn-dnn-tuning
+#SBATCH --output=slurm-%A_%a.txt
+#SBATCH --time=1-00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=8G
+#SBATCH --array=1-300
+
+VIRTUALENV_PATH=/proj/jumaatta/rbfn_venv
+REPOSITORY_PATH=/proj/jumaatta/rbfn
+OUTPUT_PATH=${REPOSITORY_PATH}/output/dnn_tuning_raw
+
+echo "Slurm job id: $SLURM_JOB_ID"
+echo "Slurm array task id: $SLURM_ARRAY_TASK_ID"
+echo "Task started"
+date
+
+module purge
+module load Python/3.6.4-foss-2018a
+
+source ${VIRTUALENV_PATH}/bin/activate
+
+if [ $((SLURM_ARRAY_TASK_ID % 3)) -eq 1 ]; then
+	SURFACE=100
+elif [ $((SLURM_ARRAY_TASK_ID % 3)) -eq 2 ]; then
+	SURFACE=110
+else
+	SURFACE=111
+fi
+
+OUTFILE=${OUTPUT_PATH}/dnn-${SURFACE}-${SLURM_ARRAY_TASK_ID}.json
+
+if [ ! -f "$OUTFILE" ]; then
+	cd $REPOSITORY_PATH
+	srun --exclusive -N 1 -n 1 -c $SLURM_CPUS_PER_TASK \
+		python -u dnn_tuning_task.py \
+			--seed $SLURM_ARRAY_TASK_ID \
+			--surface $SURFACE \
+			--output-file $OUTFILE \
+			--num-experiments 10 \
+			--num-threads $SLURM_CPUS_PER_TASK
+fi
+
+echo "Task finished"
+date

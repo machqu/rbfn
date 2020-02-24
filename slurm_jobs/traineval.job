@@ -1,0 +1,144 @@
+#!/bin/bash
+#SBATCH --partition=short
+#SBATCH --chdir=/wrk/users/jumaatta
+#SBATCH --job-name=rbfn-traineval
+#SBATCH --output=slurm-%A_%a.txt
+#SBATCH --time=1-00:00
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --array=0-239
+
+VIRTUALENV_PATH=/proj/jumaatta/rbfn_venv
+REPOSITORY_PATH=/proj/jumaatta/rbfn
+OUTPUT_PATH=${REPOSITORY_PATH}/output/traineval_raw
+
+echo "Slurm job id: $SLURM_JOB_ID"
+echo "Slurm array task id: $SLURM_ARRAY_TASK_ID"
+echo "Task started"
+date
+
+module purge
+module load Python/3.6.4-foss-2018a
+
+source ${VIRTUALENV_PATH}/bin/activate
+
+SEED=$SLURM_ARRAY_TASK_ID
+TASK_TYPE=$((SLURM_ARRAY_TASK_ID / 10))
+
+if [ $TASK_TYPE -eq 0 ]; then
+	SURFACE=100
+	MODEL=xgb
+	NUM_RBFN_CENTROIDS=0
+elif [ $TASK_TYPE -eq 1 ]; then
+	SURFACE=100
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=128
+elif [ $TASK_TYPE -eq 2 ]; then
+	SURFACE=100
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=256
+elif [ $TASK_TYPE -eq 3 ]; then
+	SURFACE=100
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=512
+elif [ $TASK_TYPE -eq 4 ]; then
+	SURFACE=100
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=1024
+elif [ $TASK_TYPE -eq 5 ]; then
+	SURFACE=100
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=2048
+elif [ $TASK_TYPE -eq 6 ]; then
+	SURFACE=100
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=4096
+elif [ $TASK_TYPE -eq 7 ]; then
+	SURFACE=110
+	MODEL=xgb
+	NUM_RBFN_CENTROIDS=0
+elif [ $TASK_TYPE -eq 8 ]; then
+	SURFACE=110
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=128
+elif [ $TASK_TYPE -eq 9 ]; then
+	SURFACE=110
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=256
+elif [ $TASK_TYPE -eq 10 ]; then
+	SURFACE=110
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=512
+elif [ $TASK_TYPE -eq 11 ]; then
+	SURFACE=110
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=1024
+elif [ $TASK_TYPE -eq 12 ]; then
+	SURFACE=110
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=2048
+elif [ $TASK_TYPE -eq 13 ]; then
+	SURFACE=110
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=4096
+elif [ $TASK_TYPE -eq 14 ]; then
+	SURFACE=111
+	MODEL=xgb
+	NUM_RBFN_CENTROIDS=0
+elif [ $TASK_TYPE -eq 15 ]; then
+	SURFACE=111
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=128
+elif [ $TASK_TYPE -eq 16 ]; then
+	SURFACE=111
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=256
+elif [ $TASK_TYPE -eq 17 ]; then
+	SURFACE=111
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=512
+elif [ $TASK_TYPE -eq 18 ]; then
+	SURFACE=111
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=1024
+elif [ $TASK_TYPE -eq 19 ]; then
+	SURFACE=111
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=2048
+elif [ $TASK_TYPE -eq 20 ]; then
+	SURFACE=111
+	MODEL=rbfn
+	NUM_RBFN_CENTROIDS=4096
+elif [ $TASK_TYPE -eq 21 ]; then
+	SURFACE=100
+	MODEL=dnn
+	NUM_RBFN_CENTROIDS=0
+elif [ $TASK_TYPE -eq 22 ]; then
+	SURFACE=110
+	MODEL=dnn
+	NUM_RBFN_CENTROIDS=0
+elif [ $TASK_TYPE -eq 23 ]; then
+	SURFACE=111
+	MODEL=dnn
+	NUM_RBFN_CENTROIDS=0
+fi
+
+OUTFILE_JSON=${OUTPUT_PATH}/traineval-${SLURM_ARRAY_TASK_ID}.json
+OUTFILE_MODEL=${OUTPUT_PATH}/traineval-${SLURM_ARRAY_TASK_ID}.model.gz
+
+if [ ! -f "$OUTFILE_JSON" ]; then
+	cd $REPOSITORY_PATH
+	srun --exclusive -N 1 -n 1 -c $SLURM_CPUS_PER_TASK \
+		python -u traineval_task.py \
+			--seed $SEED \
+			--model $MODEL \
+			--num-rbfn-centroids $NUM_RBFN_CENTROIDS \
+			--surface $SURFACE \
+			--output-file-json $OUTFILE_JSON \
+			--output-file-model $OUTFILE_MODEL \
+			--num-threads $SLURM_CPUS_PER_TASK
+fi
+
+echo "Task finished"
+date

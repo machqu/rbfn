@@ -1,0 +1,19 @@
+name: rbfn
+channels:
+  - r
+  - defaults
+dependencies:
+# Python dependencies
+  - python=3.6.0
+  - numpy
+  - pandas
+  - pytorch=1.1.0
+  - torchvision=0.4.0
+# R dependencies
+  - r-data.table
+  - r-ggplot2
+# Python dependencies from pip
+  - pip:
+    - sklearn
+    - xgboost
+    - matplotlib
