@@ -49,7 +49,7 @@ def main():
     num_centroids = 100
     num_pruned_centroids = 3
     num_plot_points = 1000
-    num_pruning_attempts = 3
+    num_pruning_attempts = 30
     plot_extra_range = 2.0
 
     np.random.seed(seed)
@@ -159,6 +159,14 @@ def main():
     ax.tick_params(axis='both', which='minor', labelsize=8)
     for x in [x_min, x_max]:
         ax.axvline(x, color="black", linestyle="--")
+    for pruned_rbfn, color in [
+        (pruned_normal["rbfn"], ax.get_lines()[2].get_color()),
+        (pruned_uniform["rbfn"], ax.get_lines()[3].get_color())
+    ]:
+        xs = pruned_rbfn.Z.detach().squeeze().numpy()
+        for x in xs:
+            ax.axvline(x, color=color, linestyle=":")
+
     ax.legend(["exp(-x²) + 0.2 cos(4x)",
                "RBFN, 100 centr.",
                "Pruned RBFN, 3 centr., N(0, 1)",
