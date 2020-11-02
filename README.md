@@ -61,12 +61,11 @@ If you use this work in an academic publication,
 please use the following citation:
 
 ````
-@misc{rbfn,
-  author={Jussi Määttä and Viacheslav Bazaliy and Jyri Kimari and Flyura Djurabekova and Kai Nordlund and Teemu Roos},
-  title={Gradient-Based Training and Pruning of Radial Basis Function Networks with an Application in Materials Physics},
-  year={2020},
-  eprint={TODO},
-  archivePrefix={arXiv},
-  primaryClass={TODO}
+@article{MaattaBazaliyKimariDjurabekovaNordlundRoos2020,
+  title = "Gradient-based training and pruning of radial basis function networks with an application in materials physics",
+  author = "Jussi Määttä and Viacheslav Bazaliy and Jyri Kimari and Flyura Djurabekova and Kai Nordlund and Teemu Roos",
+  journal = "Neural Networks",
+  year = "2020",
+  doi = "https://doi.org/10.1016/j.neunet.2020.10.002"
 }
 ````
